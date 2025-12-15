@@ -17,8 +17,10 @@ namespace project1.Controllers
     public class Userscontroller : ControllerBase
     {
         IUserServices _s;
-        public Userscontroller(IUserServices i)
+        private readonly ILogger<Userscontroller> _logger;
+        public Userscontroller(IUserServices i, ILogger<Userscontroller> logger)
         {
+            _logger = logger;
             _s = i;
         }
 
@@ -62,9 +64,9 @@ namespace project1.Controllers
             DtoUser_Id_Name res = await _s.Login(user);
             if(res!=null)
             {
+                _logger.LogInformation($"login attempted with user name,{user.Gmail} and password {user.Password}");
                 return Ok(res);
-            }
-                 
+            }  
             return NotFound();
         }
 
