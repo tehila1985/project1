@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dto;
+using Microsoft.AspNetCore.Mvc;
 using Model;
 using Services;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Api.Controllers
     }
     // GET: api/<CategoryController>
     [HttpGet]
-    public async Task<IEnumerable<Product>> Gets([FromBody] int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
+    public async Task<IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>> Gets([FromBody] int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
     {
       return await _s.GetProducts(categoryId, minPrice, maxPrice, limit, page, desc);
     }

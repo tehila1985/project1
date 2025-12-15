@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<myDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyDBConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Tehila"));
 });
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

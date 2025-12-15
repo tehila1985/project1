@@ -16,8 +16,13 @@ namespace Repository
       this.dbContext = dbContext;
     }
     public async Task<List<Product>> GetProducts(int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
-    {
-      return await dbContext.Products.ToListAsync();
-    }
+        {
+            var products = await dbContext.Products
+                                 .Include(p => p.Category) // <-- פקודת ה-ORM החשובה!
+                                  // ... סינון/מיון/הגבלה
+                                 .ToListAsync();
+
+            return products;
+        }
   }
 }

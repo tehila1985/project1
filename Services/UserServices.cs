@@ -65,7 +65,6 @@ namespace Services
             if (d.Strength >= 2)
             {
                 var a = _mapper.Map<DtoUser_Name_Password_Gmail, User>(user);
-
                 var res = await _r.update(id,a);
                 var DtoUser = _mapper.Map<User, DtoUser_Id_Name>(res);
                 return DtoUser;
