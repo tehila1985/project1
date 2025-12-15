@@ -18,8 +18,7 @@ namespace Repository
     public async Task<List<Product>> GetProducts(int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
         {
             var products = await dbContext.Products
-                                 .Include(p => p.Category) // <-- פקודת ה-ORM החשובה!
-                                  // ... סינון/מיון/הגבלה
+                                 .Include(p => p.Category) 
                                  .ToListAsync();
 
             return products;

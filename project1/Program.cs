@@ -6,11 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Model;
 using Model;
+using NLog.Web;
 using Repository;
 using Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Host.UseNLog();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<myDBContext>(options =>
 {
