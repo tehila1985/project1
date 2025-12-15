@@ -12,14 +12,15 @@ namespace Api.Controllers
   [ApiController]
   public class ProductController : ControllerBase
   {
-
-    IProductService _s;
-    public ProductController(IProductService i)
-    {
-      _s = i;
-    }
-    // GET: api/<CategoryController>
-    [HttpGet]
+        ILogger<ProductController> _logger;
+        IProductService _s;
+    public ProductController(IProductService i, ILogger<ProductController> logger)
+        {
+            _s = i;
+            _logger = logger;
+        }
+        // GET: api/<CategoryController>
+        [HttpGet]
     public async Task<IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>> Gets([FromBody] int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
     {
       return await _s.GetProducts(categoryId, minPrice, maxPrice, limit, page, desc);

@@ -1,10 +1,11 @@
-﻿using Model;
+﻿using Dto;
+using Model;
 
 namespace Services
 {
-  public interface IOrderService
-  {
-    Task<Order> AddNewOrder(Order order);
-    Task<Order?> GetOrderById(int id);
-  }
+    public interface IOrderService
+    {
+        Task<DtoOrder_Id_UserId_Date_Sum_OrderItems> AddNewOrder(DtoOrder_Id_UserId_Date_Sum_OrderItems order);
+        Task<DtoOrder_Id_UserId_Date_Sum_OrderItems?> GetOrderById(int id);
+    }
 }

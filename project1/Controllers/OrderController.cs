@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dto;
+using Microsoft.AspNetCore.Mvc;
 using Model;
 using Services;
 
@@ -6,41 +7,41 @@ using Services;
 
 namespace Api.Controllers
 {
-  [Route("api/[controller]")]
-  [ApiController]
-  public class OrderController : ControllerBase
-  {
-    IOrderService _s;
-    public OrderController(IOrderService i)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class OrderController : ControllerBase
     {
-      _s = i;
-    }
-    // GET api/<OrderController>/5
-    // GET api/<users>/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Order>> Get(int id)
-    {
-      Order order = await _s.GetOrderById(id);
-      if (order != null)
-      {
-        return Ok(order);
-      }
-      return NoContent();
-    }
+        IOrderService _s;
+        public OrderController(IOrderService i)
+        {
+            _s = i;
+        }
+        // GET api/<OrderController>/5
+        // GET api/<users>/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DtoOrder_Id_UserId_Date_Sum_OrderItems>> Get(int id)
+        {
+            DtoOrder_Id_UserId_Date_Sum_OrderItems order = await _s.GetOrderById(id);
+            if (order != null)
+            {
+                return Ok(order);
+            }
+            return NoContent();
+        }
 
-    // POST api/<users>
-    [HttpPost]
-    public async Task<ActionResult<Order>> Post([FromBody] Order order)
-    {
+        // POST api/<users>
+        [HttpPost]
+        public async Task<ActionResult<DtoOrder_Id_UserId_Date_Sum_OrderItems>> Post([FromBody] DtoOrder_Id_UserId_Date_Sum_OrderItems order)
+        {
 
-      Order res = await _s.AddNewOrder(order);
-      if (res != null)
-      {
-        return CreatedAtAction(nameof(Get), new { id = res.OrderId }, res);
-      }
-      else
-        return BadRequest();
+            DtoOrder_Id_UserId_Date_Sum_OrderItems res = await _s.AddNewOrder(order);
+            if (res != null)
+            {
+                return CreatedAtAction(nameof(Get), new { id = res.OrderId }, res);
+            }
+            else
+                return BadRequest();
+        }
+
     }
-
-  }
 }

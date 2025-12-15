@@ -12,11 +12,12 @@ namespace Api.Controllers
   public class CategoryController : ControllerBase
   {
 
-    ICategoryService _s;
-    public CategoryController(ICategoryService i)
-    {
-      _s = i;
-    }
+      ILogger<CategoryController> _logger;
+      ICategoryService _s;
+    public CategoryController(ICategoryService i, ILogger<CategoryController> logger){
+         _s = i;
+        _logger= logger;
+     }
     // GET: api/<CategoryController>
     [HttpGet]
     public async Task<IEnumerable<DtoCategory_Name_Id>> Get()

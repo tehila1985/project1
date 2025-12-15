@@ -1,6 +1,7 @@
-﻿using Model;
-using Repository;
+﻿using AutoMapper;
+using Dto;
 using Model;
+using Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +10,29 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-  public class OrderService : IOrderService
-  {
-    IOrderRepository _r;
-    public OrderService(IOrderRepository i)
+    public class OrderService : IOrderService
     {
-      _r = i;
-    }
-    public async Task<Order?> GetOrderById(int id)
-    {
-      return await _r.GetOrderById(id);
-    }
+        IOrderRepository _r;
+        IMapper _mapper;
 
-    public async Task<Order> AddNewOrder(Order order)
-    {
-      return await _r.AddNewOrder(order);
+        public OrderService(IOrderRepository i, IMapper mapperr)
+        {
+            _mapper = mapperr;
+            _r = i;
+        }
+        public async Task<DtoOrder_Id_UserId_Date_Sum_OrderItems?> GetOrderById(int id)
+        {
+            Order o = await _r.GetOrderById(id);
+            return _mapper.Map<Order, DtoOrder_Id_UserId_Date_Sum_OrderItems>(o);
+
+        }
+
+        public async Task<DtoOrder_Id_UserId_Date_Sum_OrderItems> AddNewOrder(DtoOrder_Id_UserId_Date_Sum_OrderItems order)
+        {
+            var ooo = _mapper.Map<DtoOrder_Id_UserId_Date_Sum_OrderItems, Order>(order);
+            Order o = await _r.AddNewOrder(ooo);
+            var oo = _mapper.Map<Order, DtoOrder_Id_UserId_Date_Sum_OrderItems>(o);
+            return oo;
+        }
     }
-  }
 }

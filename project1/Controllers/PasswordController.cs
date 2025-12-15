@@ -11,11 +11,13 @@ namespace Api.Controllers
     public class PasswordController : ControllerBase
     {
         IPasswordService _p;
-        public PasswordController(IPasswordService ip)
+        ILogger<PasswordController> _logger;
+        public PasswordController(IPasswordService ip, ILogger<PasswordController> logger)
         {
-            _p= ip;
+            _p = ip;
+            _logger = logger;
         }
-        
+
         //// GET api/<PasswordController>/5
         //[HttpGet("{id}")]
         //public DtoPassword_Password_Strength Get(PassWord p)
