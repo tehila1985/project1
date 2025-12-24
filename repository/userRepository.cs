@@ -20,7 +20,7 @@ namespace Repository
             return await dbContext.Users.ToListAsync();
         }
 
-        public async  Task<User?> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
             return await dbContext.Users.FindAsync(id);
         }
@@ -33,7 +33,7 @@ namespace Repository
 
         public async Task<User?> Login(User value)
         {
-            return dbContext.Users.FirstOrDefault(user => user.Password == value.Password && user.Gmail == value.Gmail);
+            return await dbContext.Users.FirstOrDefaultAsync(user => user.Password == value.Password && user.Gmail == value.Gmail);
         }
 
         public async Task<User> update(int id, User value)
