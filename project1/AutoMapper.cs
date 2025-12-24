@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using Dto;
-using Dto.Dto;
 using Model;
-using Model;
-
 namespace Api
 {
     public class AutoMapper : Profile

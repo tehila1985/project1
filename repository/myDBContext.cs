@@ -11,7 +11,10 @@ public partial class myDBContext : DbContext
         : base(options)
     {
     }
+    public myDBContext()
+    {
 
+    }
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }

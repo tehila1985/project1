@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Model;
 
 using System.Collections.Specialized;
@@ -22,13 +23,15 @@ namespace Repository
 
         public async Task<User?> GetUserById(int id)
         {
-            return await dbContext.Users.FindAsync(id);
+            return await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == id);
         }
+
         public async Task<User> AddNewUser(User user)
         {
-            await dbContext.Users.AddAsync(user);
-            await dbContext.SaveChangesAsync();
-            return user;
+           
+              await dbContext.Users.AddAsync(user);
+              await dbContext.SaveChangesAsync();
+              return user;
         }
 
         public async Task<User?> Login(User value)
