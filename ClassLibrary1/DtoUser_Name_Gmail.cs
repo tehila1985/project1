@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dto
 {
-    //public record  DtoUser_Name_Gmail(int UserId,string Gmail,string UserFirstName,string UserLastname );
+    
     public class DtoUser_Name_Gmail
     {
         public int UserId { get; set; }
