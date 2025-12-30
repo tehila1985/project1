@@ -9,12 +9,16 @@ namespace Model;
 
 public partial class Order
 {
+    [Required(ErrorMessage = "Order ID is required")]
     public int OrderId { get; set; }
+
+    [Required(ErrorMessage = "User ID is required")]
 
     public int UserId { get; set; }
 
     public DateOnly? Date { get; set; }
 
+    [Range(0, int.MaxValue, ErrorMessage = "Sum must be bigger than 0")]
     public int? Sum { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

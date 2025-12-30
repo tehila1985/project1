@@ -9,6 +9,7 @@ namespace Model;
 
 public partial class Category
 {
+    [Required(ErrorMessage = "Category ID is required")]
     public int CategoryId { get; set; }
 
     public string Name { get; set; }

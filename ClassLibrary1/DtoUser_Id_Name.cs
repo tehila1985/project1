@@ -13,9 +13,6 @@ namespace Dto
     public class DtoUser_Id_Name
     {
         public string? UserId { get; set; }
-
-        [Required(ErrorMessage = "First name is required")]
-        [StringLength(50, ErrorMessage = "First name cannot be longer than 50 ")]
         public string UserFirstName { get; set; }
     }
 

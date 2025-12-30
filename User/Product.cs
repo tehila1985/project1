@@ -2,17 +2,20 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Model;
 
 public partial class Product
 {
+    [Required(ErrorMessage = "ProductId is required")]
     public int ProductId { get; set; }
 
     public string Name { get; set; }
-
+    [Required(ErrorMessage = "CategoryId is required")]
     public int? CategoryId { get; set; }
 
+    [Range(0, int.MaxValue, ErrorMessage = "Price must be bigger than 0")]
     public int? Price { get; set; }
 
     public string Description { get; set; }

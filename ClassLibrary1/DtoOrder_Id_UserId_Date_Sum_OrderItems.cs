@@ -14,10 +14,9 @@ namespace Dto
         [Required(ErrorMessage = "User ID is required.")]
         public int UserId { get; set; }
 
-        [Required(ErrorMessage = "Order date is required.")]
         public DateOnly? Date { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "Sum must be a non-negative value.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Sum must be bigger than 0")]
         public int? Sum { get; set; }
 
         public virtual ICollection<DtoOrderItem_Id_OrderId_ProductId_Quantity> OrderItems { get; set; } = new List<DtoOrderItem_Id_OrderId_ProductId_Quantity>();

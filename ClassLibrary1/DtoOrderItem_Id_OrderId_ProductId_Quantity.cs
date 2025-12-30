@@ -12,17 +12,15 @@ namespace Dto
     {
         public int OrderItemId { get; set; }
 
-        [Required(ErrorMessage = "Order ID is required.")]
+        [Required(ErrorMessage = "Order ID is required")]
         public int OrderId { get; set; }
 
-        [Required(ErrorMessage = "Item name is required.")]
-        [StringLength(100, ErrorMessage = "Item name cannot be longer than 100 characters.")]
         public string ItemName { get; set; }
 
-        [Required(ErrorMessage = "Product ID is required.")]
-        public int? ProductId { get; set; } // Assuming ProductId can be null but might need validation based on business logic
+        [Required(ErrorMessage = "Product ID is required")]
+        public int? ProductId { get; set; } 
 
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        public int? Quantity { get; set; } // Assuming Quantity can be nullable but should be validated if present
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+        public int? Quantity { get; set; }
     }
 }
