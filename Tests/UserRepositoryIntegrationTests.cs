@@ -3,44 +3,27 @@ using Model;
 using Repository;
 using Test;
 using Xunit;
+using System;
+using System.Threading.Tasks;
 
 namespace Tests
 {
+    [Collection("Database Collection")]
     public class UserRepositoryIntegrationTests : IClassFixture<DatabaseFixture>, IDisposable
     {
         private readonly myDBContext _dbContext;
+        private readonly DatabaseFixture _fixture;
         private readonly UserRepository _userRepository;
 
         public UserRepositoryIntegrationTests(DatabaseFixture databaseFixture)
         {
-            _dbContext = databaseFixture.Context;
+            _fixture = databaseFixture;
+            _dbContext = _fixture.Context;
             _userRepository = new UserRepository(_dbContext);
-
-            // ניקוי התחלתי ליתר ביטחון
-            ClearDatabase();
+            _fixture.ClearDatabase();
         }
 
-        // --- הוק הניקוי (Teardown) ---
-        // פונקציה זו רצה אוטומטית אחרי כל [Fact]
-        public void Dispose()
-        {
-            ClearDatabase();
-        }
-
-        private void ClearDatabase()
-        {
-            // 1. מנקה את הזיכרון של EF כדי למנוע התנגשויות בין טסטים
-            _dbContext.ChangeTracker.Clear();
-
-            // 2. מוחק את כל המשתמשים מהטבלה
-            var allUsers = _dbContext.Users.ToList();
-            _dbContext.Users.RemoveRange(allUsers);
-
-            // 3. שומר את השינויים ב-DB
-            _dbContext.SaveChanges();
-        }
-
-        // --- Tests ---
+        public void Dispose() => _fixture.ClearDatabase();
 
         [Fact]
         public async Task AddNewUser_ShouldAddUser_WithValidData()
@@ -78,7 +61,6 @@ namespace Tests
         public async Task GetUsers_ShouldReturnEmptyList_WhenNoUsersExist()
         {
             var result = await _userRepository.GetUsers();
-            Assert.NotNull(result);
             Assert.Empty(result);
         }
 
@@ -133,7 +115,7 @@ namespace Tests
             var result = await _userRepository.GetUsers();
             Assert.Equal(2, result.Count);
         }
-
+      
         [Fact]
         public async Task Login_ShouldReturnUser_WithValidCredentials()
         {
@@ -141,13 +123,6 @@ namespace Tests
             var result = await _userRepository.Login(new User { Gmail = "loginok@test.com", Password = "CorrectPassword" });
             Assert.NotNull(result);
         }
-        //מחכה שיזרק שגיאה
-        //[Fact]
-        //public async Task AddNewUser_ShouldThrowValidationException_WhenEmailInvalid()
-        //{
-        //    var user = new User { Gmail = "bad-email", Password = "Password123" };
-        //    await Assert.ThrowsAsync<DbUpdateException>(async () => await _userRepository.AddNewUser(user));
-        //}
 
         //[Fact]
         //public async Task AddNewUser_ShouldThrowValidationException_WhenPasswordTooShort()
@@ -164,6 +139,18 @@ namespace Tests
         //}
 
         //[Fact]
+        //public async Task AddNewUser_ShouldThrowValidationException_WhenEmailInvalid()
+        //{
+        //    var user = new User { Gmail = "bad-email", Password = "Password123" };
+        //    await Assert.ThrowsAsync<DbUpdateException>(async () => await _userRepository.AddNewUser(user));
+        //}
+        //[Fact]
+        //public async Task AddNewUser_ShouldThrowValidationException_WhenPasswordTooShort()
+        //{
+        //    var user = new User { Gmail = "short@test.com", Password = "1" };
+        //    await Assert.ThrowsAsync<DbUpdateException>(async () => await _userRepository.AddNewUser(user));
+        //}
+        //[Fact]
         //public async Task AddNewUser_ShouldThrowValidationException_WhenEmailAlreadyExists()
         //{
         //    await _userRepository.AddNewUser(new User { Gmail = "dup@test.com", Password = "Password123" });
@@ -172,3 +159,11 @@ namespace Tests
         //}
     }
 }
+
+
+
+
+
+
+
+

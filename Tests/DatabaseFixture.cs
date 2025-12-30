@@ -1,34 +1,39 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Test
 {
-
     public class DatabaseFixture : IDisposable
     {
         public myDBContext Context { get; private set; }
 
         public DatabaseFixture()
         {
-
-            // Set up the test database connection and initialize the context
             var options = new DbContextOptionsBuilder<myDBContext>()
-
-                .UseSqlServer("Server=LAPTOP-LDNABVH4\\SQLEXPRESS;Database=Tests_329239529;Trusted_Connection=True;TrustServerCertificate=True;")
+                .UseSqlServer("Server = LAPTOP-LDNABVH4\\SQLEXPRESS;Database=Tests;Trusted_Connection=True;TrustServerCertificate=True;")
                 .Options;
             Context = new myDBContext(options);
             Context.Database.EnsureCreated();
         }
 
+        public void ClearDatabase()
+        {
+            Context.ChangeTracker.Clear();
+            // סדר המחיקה קריטי למניעת שגיאות Foreign Key
+            if (Context.OrderItems.Any()) Context.OrderItems.RemoveRange(Context.OrderItems);
+            if (Context.Orders.Any()) Context.Orders.RemoveRange(Context.Orders);
+            if (Context.Products.Any()) Context.Products.RemoveRange(Context.Products);
+            if (Context.Categories.Any()) Context.Categories.RemoveRange(Context.Categories);
+            if (Context.Users.Any()) Context.Users.RemoveRange(Context.Users);
+            Context.SaveChanges();
+        }
+
         public void Dispose()
         {
-            // Clean up the test database after all tests are completed
             Context.Database.EnsureDeleted();
             Context.Dispose();
         }
     }
 }
+
