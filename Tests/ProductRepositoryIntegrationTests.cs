@@ -27,16 +27,23 @@ namespace Tests
 
         public void Dispose() => _fixture.ClearDatabase();
 
-        private async Task<Product> CreateSampleProductAsync(string name = "Sample Product", int price = 100)
+        private async Task<Product> CreateSampleProductAsync(
+            string name = "Sample Product",
+            int price = 100,
+            int? categoryId = null)
         {
-            var category = new Category { Name = "General" };
-            await _dbContext.Categories.AddAsync(category);
-            await _dbContext.SaveChangesAsync();
+            if (categoryId == null)
+            {
+                var category = new Category { Name = "General" };
+                await _dbContext.Categories.AddAsync(category);
+                await _dbContext.SaveChangesAsync();
+                categoryId = category.CategoryId;
+            }
 
             var product = new Product
             {
                 Name = name,
-                CategoryId = category.CategoryId,
+                CategoryId = categoryId,
                 Price = price,
                 Description = "Test description",
                 ImageUrl = "http://example.com/image.png"
@@ -47,110 +54,88 @@ namespace Tests
 
             return product;
         }
+
         [Fact]
-        public async Task AddNewProduct_ShouldAddProductSuccessfully()
+        public async Task GetProducts_ShouldReturnAllProducts_WhenNoFilters()
         {
-            var category = new Category { Name = "NewCategory" };
-            await _dbContext.Categories.AddAsync(category);
+            var p1 = await CreateSampleProductAsync("P1", 50);
+            var p2 = await CreateSampleProductAsync("P2", 100);
+            var p3 = await CreateSampleProductAsync("P3", 150);
+
+            var result = await _productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
+
+            Assert.Equal(3, result.TotalCount);
+            Assert.Contains(result.Items, p => p.ProductId == p1.ProductId);
+            Assert.Contains(result.Items, p => p.ProductId == p2.ProductId);
+            Assert.Contains(result.Items, p => p.ProductId == p3.ProductId);
+        }
+
+        [Fact]
+        public async Task GetProducts_ShouldFilterByCategory()
+        {
+            var cat1 = new Category { Name = "Cat1" };
+            var cat2 = new Category { Name = "Cat2" };
+            await _dbContext.Categories.AddRangeAsync(cat1, cat2);
             await _dbContext.SaveChangesAsync();
 
-            var product = new Product
+            var p1 = await CreateSampleProductAsync("P1", 50, cat1.CategoryId);
+            var p2 = await CreateSampleProductAsync("P2", 100, cat2.CategoryId);
+
+            var result = await _productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: new int?[] { cat1.CategoryId });
+
+            Assert.Single(result.Items);
+            Assert.Equal(p1.ProductId, result.Items.First().ProductId);
+            Assert.Equal(1, result.TotalCount);
+        }
+
+        [Fact]
+        public async Task GetProducts_ShouldFilterByPriceRange()
+        {
+            var cheap = await CreateSampleProductAsync("Cheap", 50);
+            var expensive = await CreateSampleProductAsync("Expensive", 200);
+
+            var result = await _productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: 100,
+                maxPrice: 300,
+                categoryIds: Array.Empty<int?>());
+
+            Assert.Single(result.Items);
+            Assert.Equal(expensive.ProductId, result.Items.First().ProductId);
+        }
+
+        [Fact]
+        public async Task GetProducts_ShouldSupportPagination()
+        {
+            for (int i = 0; i < 5; i++)
             {
-                Name = "New Product",
-                CategoryId = category.CategoryId,
-                Price = 150,
-                Description = "A new product",
-                ImageUrl = "http://example.com/new.png"
-            };
+                await CreateSampleProductAsync($"Product{i}", 50 + i * 10);
+            }
 
-            await _dbContext.Products.AddAsync(product);
-            await _dbContext.SaveChangesAsync();
+            var result = await _productRepository.getProducts(
+                position: 2,
+                skip: 2,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
 
-            var savedProduct = await _dbContext.Products.FindAsync(product.ProductId);
-            Assert.NotNull(savedProduct);
-            Assert.Equal("New Product", savedProduct.Name);
+            Assert.Equal(5, result.TotalCount);
+            Assert.Equal(2, result.Items.Count);
         }
-
-        [Fact]
-        public async Task GetProducts_ShouldReturnAllProducts_WhenNoFilterApplied()
-        {
-            // יצירת כמה מוצרים לדוגמה
-            var product1 = await CreateSampleProductAsync("Prod1", 50);
-            var product2 = await CreateSampleProductAsync("Prod2", 100);
-            var product3 = await CreateSampleProductAsync("Prod3", 150);
-
-            var result = await _productRepository.GetProducts(null, null, null, null, null, false);
-
-            Assert.NotNull(result);
-            Assert.True(result.Count >= 3); // לפחות שלושה מוצרים קיימים
-            Assert.Contains(result, p => p.ProductId == product1.ProductId);
-            Assert.Contains(result, p => p.ProductId == product2.ProductId);
-            Assert.Contains(result, p => p.ProductId == product3.ProductId);
-        }
-
-        [Fact]
-        public async Task GetProducts_ShouldReturnProducts_WhenExist()
-        {
-            var product = await CreateSampleProductAsync();
-            var result = await _productRepository.GetProducts(null, null, null, null, null, false);
-
-            Assert.NotNull(result);
-            Assert.Contains(result, p => p.ProductId == product.ProductId);
-        }
-
-        //[Fact]
-        //public async Task GetProducts_ShouldFilterByCategory()
-        //{
-        //    var category1 = new Category { Name = "Cat1" };
-        //    var category2 = new Category { Name = "Cat2" };
-        //    await _dbContext.Categories.AddRangeAsync(category1, category2);
-        //    await _dbContext.SaveChangesAsync();
-
-        //    var product1 = new Product { Name = "P1", CategoryId = category1.CategoryId, Price = 50 };
-        //    var product2 = new Product { Name = "P2", CategoryId = category2.CategoryId, Price = 100 };
-        //    await _dbContext.Products.AddRangeAsync(product1, product2);
-        //    await _dbContext.SaveChangesAsync();
-
-        //    var result = await _productRepository.GetProducts(new int[] { category1.CategoryId }, null, null, null, null, false);
-
-        //    Assert.Single(result);
-        //    Assert.Equal(product1.ProductId, result[0].ProductId);
-        //}
-
-        //[Fact]
-        //public async Task GetProducts_ShouldFilterByPriceRange()
-        //{
-        //    var product1 = await CreateSampleProductAsync("Cheap", 50);
-        //    var product2 = await CreateSampleProductAsync("Expensive", 200);
-
-        //    var result = await _productRepository.GetProducts(null, 100, 300, null, null, false);
-
-        //    Assert.Single(result);
-        //    Assert.Equal(product2.ProductId, result[0].ProductId);
-        //}
-
-        //[Fact]
-        //public async Task GetProducts_ShouldOrderDescending_WhenDescIsTrue()
-        //{
-        //    var product1 = await CreateSampleProductAsync("A", 50);
-        //    var product2 = await CreateSampleProductAsync("B", 100);
-
-        //    var result = await _productRepository.GetProducts(null, null, null, null, null, true);
-
-        //    Assert.Equal(product2.ProductId, result.First().ProductId);
-        //}
-
-        //[Fact]
-        //public async Task GetProducts_ShouldSupportPagination()
-        //{
-        //    for (int i = 0; i < 5; i++)
-        //    {
-        //        await CreateSampleProductAsync($"Product{i}", 50 + i * 10);
-        //    }
-
-        //    var result = await _productRepository.GetProducts(null, null, null, 2, 2, false); // page 2, limit 2
-
-        //    Assert.Equal(2, result.Count);
-        //}
     }
 }

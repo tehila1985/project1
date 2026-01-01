@@ -22,119 +22,143 @@ namespace Tests
             productRepository = new ProductRepository(mockContext.Object);
         }
 
-        // ===== Setup לדוגמא =====
-        private (Category category, Product product) CreateSampleProduct()
+        // ===== Sample Data =====
+        private List<Product> CreateSampleProducts()
         {
-            var category = new Category { CategoryId = 1, Name = "Electronics" };
-            var product = new Product
+            return new List<Product>
             {
-                ProductId = 1,
-                Name = "Laptop",
-                CategoryId = category.CategoryId,
-                Category = category,
-                Price = 1000,
-                Description = "High-end laptop",
-                ImageUrl = "http://example.com/laptop.png"
+                new Product
+                {
+                    ProductId = 1,
+                    Name = "Cheap",
+                    CategoryId = 1,
+                    Price = 50,
+                    Description = "Cheap product"
+                },
+                new Product
+                {
+                    ProductId = 2,
+                    Name = "Mid",
+                    CategoryId = 2,
+                    Price = 150,
+                    Description = "Mid product"
+                },
+                new Product
+                {
+                    ProductId = 3,
+                    Name = "Expensive",
+                    CategoryId = 1,
+                    Price = 300,
+                    Description = "Expensive product"
+                }
             };
-            return (category, product);
         }
 
         [Fact]
-        public async Task GetProducts_ShouldReturnAllProducts_WhenProductsExist()
+        public async Task getProducts_ShouldReturnAllProducts_WhenNoFilters()
         {
-            var (category, product) = CreateSampleProduct();
-            var products = new List<Product> { product };
-
+            var products = CreateSampleProducts();
             mockContext.Setup(c => c.Products).ReturnsDbSet(products);
 
-            var result = await productRepository.GetProducts(null, null, null, null, null, false);
+            var result = await productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
 
-            Assert.NotNull(result);
-            Assert.Single(result);
-            Assert.Equal(product.ProductId, result.First().ProductId);
+            Assert.Equal(3, result.TotalCount);
+            Assert.Equal(3, result.Items.Count);
         }
 
         [Fact]
-        public async Task GetProducts_ShouldReturnEmptyList_WhenNoProductsExist()
+        public async Task getProducts_ShouldReturnEmpty_WhenNoProductsExist()
         {
             mockContext.Setup(c => c.Products).ReturnsDbSet(new List<Product>());
 
-            var result = await productRepository.GetProducts(null, null, null, null, null, false);
+            var result = await productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalCount);
         }
 
         [Fact]
-        public async Task AddNewProduct_ShouldCallAddAndSave()
+        public async Task getProducts_ShouldFilterByCategory()
         {
-            var category = new Category { CategoryId = 1, Name = "Books" };
-            var product = new Product
-            {
-                ProductId = 1,
-                Name = "C# Programming",
-                CategoryId = category.CategoryId,
-                Category = category,
-                Price = 50
-            };
-
-            mockContext.Setup(c => c.Products).ReturnsDbSet(new List<Product>());
-            mockContext.Setup(c => c.Categories).ReturnsDbSet(new List<Category> { category });
-            mockContext.Setup(c => c.SaveChangesAsync(default)).ReturnsAsync(1);
-
-            await mockContext.Object.Products.AddAsync(product);
-            await mockContext.Object.SaveChangesAsync();
-
-            mockContext.Verify(c => c.Products.AddAsync(product, default), Times.Once);
-            mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
-        }
-
-
-        [Fact]
-        public async Task GetProducts_ShouldFilterByCategoryId()
-        {
-            var category1 = new Category { CategoryId = 1, Name = "Cat1" };
-            var category2 = new Category { CategoryId = 2, Name = "Cat2" };
-            var product1 = new Product { ProductId = 1, Name = "P1", CategoryId = 1, Price = 100 };
-            var product2 = new Product { ProductId = 2, Name = "P2", CategoryId = 2, Price = 200 };
-
-            mockContext.Setup(c => c.Products).ReturnsDbSet(new List<Product> { product1, product2 });
-
-            var result = await productRepository.GetProducts(new int[] { 1 }, null, null, null, null, false);
-
-            // כאן, לפי מימוש הנוכחי של GetProducts, הסינון עדיין לא עובד באמת
-            // Unit test יכול לבדוק שהמוצר קיים ברשימה כללית
-            Assert.Contains(result, p => p.ProductId == product1.ProductId);
-        }
-
-        [Fact]
-        public async Task GetProducts_ShouldFilterByPriceRange()
-        {
-            var product1 = new Product { ProductId = 1, Name = "Cheap", Price = 50 };
-            var product2 = new Product { ProductId = 2, Name = "Expensive", Price = 200 };
-
-            mockContext.Setup(c => c.Products).ReturnsDbSet(new List<Product> { product1, product2 });
-
-            var result = await productRepository.GetProducts(null, 100, 300, null, null, false);
-
-            // לפי מימוש הנוכחי של GetProducts, עדיין מוחזר הכל
-            Assert.Contains(result, p => p.ProductId == product2.ProductId);
-        }
-
-        [Fact]
-        public async Task GetProducts_ShouldSupportPagination()
-        {
-            var products = new List<Product>();
-            for (int i = 1; i <= 5; i++)
-                products.Add(new Product { ProductId = i, Name = $"Product{i}", Price = 10 * i });
-
+            var products = CreateSampleProducts();
             mockContext.Setup(c => c.Products).ReturnsDbSet(products);
 
-            var result = await productRepository.GetProducts(null, null, null, 2, 2, false);
+            var result = await productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: new int?[] { 1 });
 
-            // עדיין לא ממומש pagination אמיתי, אך Unit test בודק שמתקבל רשימה
-            Assert.NotNull(result);
-            Assert.True(result.Count >= 2);
+            Assert.Equal(2, result.TotalCount);
+            Assert.All(result.Items, p => Assert.Equal(1, p.CategoryId));
+        }
+
+        [Fact]
+        public async Task getProducts_ShouldFilterByPriceRange()
+        {
+            var products = CreateSampleProducts();
+            mockContext.Setup(c => c.Products).ReturnsDbSet(products);
+
+            var result = await productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: null,
+                minPrice: 100,
+                maxPrice: 250,
+                categoryIds: Array.Empty<int?>());
+
+            Assert.Single(result.Items);
+            Assert.Equal(150, result.Items.First().Price);
+        }
+
+        [Fact]
+        public async Task getProducts_ShouldFilterByDescription()
+        {
+            var products = CreateSampleProducts();
+            mockContext.Setup(c => c.Products).ReturnsDbSet(products);
+
+            var result = await productRepository.getProducts(
+                position: 1,
+                skip: 10,
+                desc: "Expensive",
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
+
+            Assert.Single(result.Items);
+            Assert.Equal("Expensive", result.Items.First().Name);
+        }
+
+        [Fact]
+        public async Task getProducts_ShouldSupportPagination()
+        {
+            var products = CreateSampleProducts();
+            mockContext.Setup(c => c.Products).ReturnsDbSet(products);
+
+            var result = await productRepository.getProducts(
+                position: 2,
+                skip: 1,
+                desc: null,
+                minPrice: null,
+                maxPrice: null,
+                categoryIds: Array.Empty<int?>());
+
+            Assert.Equal(3, result.TotalCount);
+            Assert.Single(result.Items);
         }
     }
 }

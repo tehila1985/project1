@@ -20,10 +20,12 @@ namespace Api.Controllers
             _logger = logger;
         }
         // GET: api/<CategoryController>
-        [HttpGet]
-    public async Task<IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>> Gets([FromBody] int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
+    [HttpGet]
+    public async Task<(IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>, int TotalCount)> Gets([FromBody] int position, int skip, string? desc, double? minPrice, double? maxPrice, int?[] categoryIds)
     {
-      return await _s.GetProducts(categoryId, minPrice, maxPrice, limit, page, desc);
+      return await _s.GetProducts(position,skip,desc,minPrice,maxPrice,categoryIds);
     }
   }
 }
+
+

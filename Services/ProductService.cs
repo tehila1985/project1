@@ -20,11 +20,11 @@ namespace Services
                  _mapper= mapper;
              }
 
-        public async Task<IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>> GetProducts(int[]? categoryId, int? minPrice, int? maxPrice, int? limit, int? page, Boolean desc)
-    {
-            var u = await _r.GetProducts(categoryId, minPrice, maxPrice, limit, page, desc);
-            var r = _mapper.Map<List<Product>, List<DtoProduct_Id_Name_Category_Price_Desc_Image>>(u);
-            return r;
-    }
+        public async Task<(IEnumerable<DtoProduct_Id_Name_Category_Price_Desc_Image>,int TotalCount)> GetProducts(int position, int skip, string? desc, double? minPrice, double? maxPrice, int?[] categoryIds)
+        {
+            var u = await _r.getProducts(position,skip,desc,minPrice, maxPrice,categoryIds);
+            var r = _mapper.Map<List<Product>, List<DtoProduct_Id_Name_Category_Price_Desc_Image>>(u.Items);
+            return (r, u.TotalCount);
+        }
   }
 }
